@@ -68,9 +68,9 @@ export const loginUser = async (req, res) => {
     const loggedInUser = await prisma.user.findUnique({
       where: {
         email: email,
-      }
+      },
     });
-    
+
     if (!loggedInUser) {
       return ErrorResponse({ res, message: "User not found" });
     }
@@ -103,6 +103,104 @@ export const loginUser = async (req, res) => {
     ErrorResponse({
       res,
       message: "error while login user",
+      error: error.message,
+    });
+  }
+};
+
+export const logoutUser = async (req, res) => {
+  try {
+    if (!req.cookies.token) {
+      return ErrorResponse({ res, message: "user not logged in" });
+    }
+    res.clearCookie("token");
+    Responce({ res, message: "user logged out successfully" });
+  } catch (error) {
+    ErrorResponse({
+      res,
+      message: "error while logout user",
+      error: error.message,
+    });
+  }
+};
+
+export const getUser = async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        id: req.userId,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+      },
+    });
+
+    if (!user) {
+      return ErrorResponse({ res, message: "User not found" });
+    }
+
+    Responce({ res, message: "user found", data: user });
+  } catch (error) {
+    ErrorResponse({
+      res,
+      message: "error while getting user",
+      error: error.message,
+    });
+  }
+};
+
+export const updateUser = async (req, res) => {
+  try {
+    const { email, name } = req.body;
+
+    const updatedUser = await prisma.user.update({
+      where: {
+        id: req.userId,
+      },
+      data: {
+        email,
+        name,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+      },
+    });
+
+    if (!updatedUser) {
+      return ErrorResponse({ res, message: "User not found" });
+    }
+
+    Responce({ res, message: "user updated successfully", data: updatedUser });
+  } catch (error) {
+    ErrorResponse({
+      res,
+      message: "error while updating user",
+      error: error.message,
+    });
+  }
+};
+
+export const deleteUser = async (req, res) => {
+  try {
+    const user = await prisma.user.delete({
+      where: {
+        id: req.userId,
+      },
+    });
+
+    if (!user) {
+      return ErrorResponse({ res, message: "User not found" });
+    }
+
+    Responce({ res, message: "user deleted successfully" });
+  } catch (error) {
+    ErrorResponse({
+      res,
+      message: "error while deleting user",
       error: error.message,
     });
   }
