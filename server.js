@@ -24,4 +24,6 @@ app.listen(port, () => {
 });
 
 import userRouter from "./routes/user.route.js";
+import projectRouter from "./routes/project.route.js";
 app.use("/api/user", userRouter);
+app.use("/api/project", projectRouter);

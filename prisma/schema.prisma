@@ -13,9 +13,31 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
 model User {
-  id String @id @default(uuid())
-  name String 
-  email String @unique
-  password String 
+  id        String         @id @default(uuid())
+  name      String
+  email     String         @unique
+  password  String
+  projects  UserProjects[] // Relation through the join table
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+}
+
+model Project {
+  id          String         @id @default(uuid())
+  name        String
+  description String?
+  users       UserProjects[] // Relation through the join table
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+}
+
+model UserProjects {
+  userId    String
+  projectId String
+  user      User    @relation(fields: [userId], references: [id])
+  project   Project @relation(fields: [projectId], references: [id])
+
+  @@id([userId, projectId]) // Composite primary key for the join table
 }

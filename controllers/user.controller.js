@@ -134,6 +134,21 @@ export const getUser = async (req, res) => {
         id: true,
         name: true,
         email: true,
+        projects: {
+          select: {
+            project: {
+              select: {
+                id: true,
+                name: true,
+                description: true,
+                createdAt: true,
+                updatedAt: true,
+              },
+            },
+          },
+        },
+        createdAt: true,
+        updatedAt: true,
       },
     });
 
