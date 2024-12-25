@@ -151,3 +151,134 @@ export const getProjects = async (req, res) => {
     });
   }
 };
+
+export const getProject = async (req, res) => {
+  try {
+    const { projectId } = req.params;
+
+    if (!projectId) {
+      return ErrorResponse({ res, message: "projectId is required" });
+    }
+
+    const project = await prisma.project.findFirst({
+      where: {
+        id: projectId,
+        users: {
+          some: {
+            userId: req.userId,
+          },
+        },
+      },
+      include: {
+        users: {
+          select: {
+            user: {
+              select: {
+                id: true,
+                email: true,
+                name: true,
+              },
+            }
+          },
+        },
+      },
+    });
+
+    if (!project) {
+      return ErrorResponse({ res, message: "project not found" });
+    }
+
+    Responce({ res, message: "project found", data: project });
+  } catch (error) {
+    ErrorResponse({
+      res,
+      message: "error while getting project",
+      error: error.message,
+    });
+  }
+};
+
+export const removeUserFromProject = async (req, res) => {
+  try {
+    const { projectId, userId } = req.body;
+
+    if (!projectId || !userId) {
+      return ErrorResponse({ res, message: "projectId and userId are required" });
+    }
+
+    const project = await prisma.project.findFirst({
+      where: {
+        id: projectId,
+        users: {
+          some: {
+            userId: req.userId,
+          },
+        },
+      },
+    });
+
+    if (!project) {
+      return ErrorResponse({ res, message: "project not found" });
+    }
+
+    await prisma.userProjects.deleteMany({
+      where: {
+        projectId,
+        userId,
+      },
+    });
+
+    Responce({ res, message: "user removed from project" });
+  } catch (error) {
+    ErrorResponse({
+      res,
+      message: "error while removing user from project",
+      error: error.message,
+    });
+  } 
+}
+
+export const deleteProject = async (req, res) => {
+  try {
+    const { projectId } = req.body;
+
+    if (!projectId) {
+      return ErrorResponse({ res, message: "projectId is required" });
+    }
+
+    const project = await prisma.project.findFirst({
+      where: {
+        id: projectId,
+        users: {
+          some: {
+            userId: req.userId,
+          },
+        },
+      },
+    });
+
+    if (!project) {
+      return ErrorResponse({ res, message: "project not found" });
+    }
+
+    await prisma.userProjects.deleteMany({
+      where: {
+        projectId,
+      },
+    });
+
+    await prisma.project.delete({
+      where: {
+        id: projectId,
+      },
+    });
+
+    Responce({ res, message: "project deleted" });
+  } catch (error) {
+    ErrorResponse({
+      res,
+      message: "error while deleting project",
+      error: error.message,
+    });
+  }
+}
