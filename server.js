@@ -8,6 +8,7 @@ import jwt from "jsonwebtoken";
 import { prisma } from "./db/db.config.js";
 import userRouter from "./routes/user.route.js";
 import projectRouter from "./routes/project.route.js";
+import aiRouter from "./routes/ai.route.js"
 
 dotenv.config();
 
@@ -27,6 +28,7 @@ app.use(
 
 app.use("/api/user", userRouter);
 app.use("/api/project", projectRouter);
+app.use("/api/ai", aiRouter);
 
 const server = http.createServer(app);
 
